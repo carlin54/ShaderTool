@@ -1,0 +1,734 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1280</width>
+    <height>595</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>ShaderTool</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="ShaderFrame" name="shaderframe">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="vlaySettingsPanel">
+        <item>
+         <layout class="QVBoxLayout" name="vlayEditorSettings">
+          <item>
+           <widget class="QLabel" name="lblProgram">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Program</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="vlayShaderTogglesAndOther">
+            <item>
+             <layout class="QVBoxLayout" name="vlayEditorShaderToggles">
+              <item>
+               <widget class="QCheckBox" name="cbVertex">
+                <property name="text">
+                 <string>Vertex</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="cbControl">
+                <property name="text">
+                 <string>Control</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="cbEvaluation">
+                <property name="text">
+                 <string>Evaluation</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="cbGeometry">
+                <property name="text">
+                 <string>Geometry</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="cbFragment">
+                <property name="text">
+                 <string>Fragment</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="vlayEditorOther">
+              <item>
+               <spacer name="verticalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="hlayPatches">
+                <item>
+                 <widget class="QLabel" name="lblPatches">
+                  <property name="text">
+                   <string>Patches:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSpinBox" name="sbPatches">
+                  <property name="minimum">
+                   <number>1</number>
+                  </property>
+                  <property name="maximum">
+                   <number>128</number>
+                  </property>
+                  <property name="value">
+                   <number>3</number>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="hlayEditorSwitchButtons">
+            <item>
+             <widget class="QPushButton" name="btnEditorPrevious">
+              <property name="text">
+               <string>Previous</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnEditorDelete">
+              <property name="text">
+               <string>X</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnEditorNext">
+              <property name="text">
+               <string>Next</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="vlayTextureSettings">
+          <item>
+           <widget class="QLabel" name="lblTexture">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Texture</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="hlayTextureSwitchButtons">
+            <item>
+             <widget class="QPushButton" name="btnTexturePrevious">
+              <property name="text">
+               <string>Previous</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnTextureDelete">
+              <property name="text">
+               <string>X</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnTextureNext">
+              <property name="text">
+               <string>Next</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="vlayMeshSettings">
+            <item>
+             <widget class="QLabel" name="lblMesh">
+              <property name="font">
+               <font>
+                <pointsize>14</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Mesh</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="lblMesh_1">
+              <item>
+               <widget class="QLabel" name="lblMeshPositions">
+                <property name="text">
+                 <string>Positions</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="lblMeshNormals">
+                <property name="text">
+                 <string>Normals</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="lblMesh_2">
+              <item>
+               <widget class="QLabel" name="lblMeshTextureCoords">
+                <property name="text">
+                 <string>TextureCoords</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="lblMeshColors">
+                <property name="text">
+                 <string>Colors</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="hlayMeshTranslation">
+              <item>
+               <widget class="QLabel" name="lblMeshTranslation">
+                <property name="text">
+                 <string>Translation:  </string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="dsbMeshTranslationX">
+                <property name="minimum">
+                 <double>-100.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>100.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.500000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="dsbMeshTranslationY">
+                <property name="minimum">
+                 <double>-100.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>100.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.500000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="dsbMeshTranslationZ">
+                <property name="minimum">
+                 <double>-100.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>100.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.500000000000000</double>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="hlayMeshRotation">
+              <item>
+               <widget class="QLabel" name="lblMeshRotation">
+                <property name="text">
+                 <string>Rotation:     </string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="dsbMeshRotateZ">
+                <property name="minimum">
+                 <double>-360.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>360.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="dsbMeshRotateY">
+                <property name="minimum">
+                 <double>-360.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>360.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="dsbMeshRotateX">
+                <property name="minimum">
+                 <double>-360.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>360.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="hlayMeshScale">
+              <item>
+               <widget class="QLabel" name="lblMeshScale">
+                <property name="text">
+                 <string>Scale:          </string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="dsbMeshScaleX">
+                <property name="maximum">
+                 <double>100.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
+                </property>
+                <property name="value">
+                 <double>1.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="dsbMeshScaleY">
+                <property name="maximum">
+                 <double>100.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
+                </property>
+                <property name="value">
+                 <double>1.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="dsbMeshScaleZ">
+                <property name="maximum">
+                 <double>100.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
+                </property>
+                <property name="value">
+                 <double>1.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="hlayMeshSwitchButtons">
+              <item>
+               <widget class="QPushButton" name="btnMeshPrevious">
+                <property name="text">
+                 <string>Previous</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnMeshDelete">
+                <property name="text">
+                 <string>X</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnMeshNext">
+                <property name="text">
+                 <string>Next</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="vlayEditor">
+        <item>
+         <widget class="QLabel" name="lblShader">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Vertex</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPlainTextEdit" name="pteShaderCode">
+          <property name="tabStopWidth">
+           <number>40</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnCompile">
+          <property name="text">
+           <string>Compile</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="hlayShaderSwitch">
+          <item>
+           <widget class="QPushButton" name="btnShaderPrevious">
+            <property name="text">
+             <string>Previous</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnShaderNext">
+            <property name="text">
+             <string>Next</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1280</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuShader">
+    <property name="title">
+     <string>Shader</string>
+    </property>
+    <addaction name="action_Shader_Empty"/>
+    <addaction name="action_Shader_Lighting_Plain"/>
+    <addaction name="action_Shader_Lighting_Phong"/>
+    <addaction name="action_Shader_Lighting_Bling_Phong"/>
+    <addaction name="action_Shader_Lighting_Cook_Torrance"/>
+    <addaction name="actionWard_anisotropic"/>
+    <addaction name="actionToon"/>
+    <addaction name="actionBeckmann"/>
+    <addaction name="actionGaussian"/>
+   </widget>
+   <widget class="QMenu" name="menuMesh">
+    <property name="title">
+     <string>Mesh</string>
+    </property>
+    <widget class="QMenu" name="menuShape_2D">
+     <property name="title">
+      <string>Shape 2D</string>
+     </property>
+     <addaction name="action_Mesh_Shape2D_Plane"/>
+     <addaction name="action_Mesh_Shape2D_Triangle"/>
+    </widget>
+    <widget class="QMenu" name="menuShape_3D">
+     <property name="title">
+      <string>Shape 3D</string>
+     </property>
+     <addaction name="action_Mesh_Shape3D_Cube"/>
+     <addaction name="action_Mesh_Shape3D_Sphere"/>
+     <addaction name="action_Mesh_Shape3D_Icohedron"/>
+    </widget>
+    <addaction name="action_Mesh_Load_File"/>
+    <addaction name="menuShape_2D"/>
+    <addaction name="menuShape_3D"/>
+   </widget>
+   <widget class="QMenu" name="menuTexture">
+    <property name="title">
+     <string>Texture</string>
+    </property>
+    <addaction name="action_Texture_Load"/>
+   </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <widget class="QMenu" name="menuUniforms">
+     <property name="title">
+      <string>Uniforms</string>
+     </property>
+     <addaction name="action_Settings_Uniforms_Reset"/>
+    </widget>
+    <widget class="QMenu" name="menuCamera">
+     <property name="title">
+      <string>Camera</string>
+     </property>
+     <addaction name="action_Settings_Camera_Reset"/>
+    </widget>
+    <addaction name="menuUniforms"/>
+    <addaction name="menuCamera"/>
+   </widget>
+   <addaction name="menuShader"/>
+   <addaction name="menuMesh"/>
+   <addaction name="menuTexture"/>
+   <addaction name="menuSettings"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <action name="actionFile_Open">
+   <property name="text">
+    <string>Load File</string>
+   </property>
+  </action>
+  <action name="action_Mesh_Load_File">
+   <property name="text">
+    <string>Load File</string>
+   </property>
+  </action>
+  <action name="action_Texture_Load">
+   <property name="text">
+    <string>Load File</string>
+   </property>
+  </action>
+  <action name="actionPhong">
+   <property name="text">
+    <string>Phong</string>
+   </property>
+  </action>
+  <action name="actionBling_Phong">
+   <property name="text">
+    <string>Bling-Phong</string>
+   </property>
+  </action>
+  <action name="actionDefault">
+   <property name="text">
+    <string>Plain</string>
+   </property>
+  </action>
+  <action name="action_Shader_Empty">
+   <property name="text">
+    <string>Empty</string>
+   </property>
+  </action>
+  <action name="action_Mesh_Shape2D_Plane">
+   <property name="text">
+    <string>Plane</string>
+   </property>
+  </action>
+  <action name="action_Mesh_Shape2D_Triangle">
+   <property name="text">
+    <string>Triangle</string>
+   </property>
+  </action>
+  <action name="action_Mesh_Shape3D_Cube">
+   <property name="text">
+    <string>Cube</string>
+   </property>
+  </action>
+  <action name="action_Mesh_Shape3D_Pyramid">
+   <property name="text">
+    <string>Pyramid</string>
+   </property>
+  </action>
+  <action name="action_Mesh_Shape3D_Frustrum">
+   <property name="text">
+    <string>Frustrum</string>
+   </property>
+  </action>
+  <action name="action_Mesh_Shape3D_Sphere">
+   <property name="text">
+    <string>Sphere</string>
+   </property>
+  </action>
+  <action name="actionCook_Torrance">
+   <property name="text">
+    <string>Cook-Torrance</string>
+   </property>
+  </action>
+  <action name="action_Shader_Lighting_Cook_Torrance">
+   <property name="text">
+    <string>Cook-Torrance</string>
+   </property>
+  </action>
+  <action name="action_Shader_Lighting_Phong">
+   <property name="text">
+    <string>Phong</string>
+   </property>
+  </action>
+  <action name="action_Shader_Lighting_Bling_Phong">
+   <property name="text">
+    <string>Bling-Phong</string>
+   </property>
+  </action>
+  <action name="action_Shader_Lighting_Plain">
+   <property name="text">
+    <string>Plain</string>
+   </property>
+  </action>
+  <action name="action_Settings_Uniforms_Reset">
+   <property name="text">
+    <string>Reset</string>
+   </property>
+  </action>
+  <action name="action_Settings_Camera_Reset">
+   <property name="text">
+    <string>Reset</string>
+   </property>
+  </action>
+  <action name="action_Mesh_Shape3D_Icohedron">
+   <property name="text">
+    <string>Icosahedron</string>
+   </property>
+  </action>
+  <action name="actionWard_anisotropic">
+   <property name="text">
+    <string>Ward Anisotropic</string>
+   </property>
+  </action>
+  <action name="actionToon">
+   <property name="text">
+    <string>Toon</string>
+   </property>
+  </action>
+  <action name="actionBeckmann">
+   <property name="text">
+    <string>Beckmann</string>
+   </property>
+  </action>
+  <action name="actionGaussian">
+   <property name="text">
+    <string>Gaussian</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>ShaderFrame</class>
+   <extends>QOpenGLWidget</extends>
+   <header>shaderframe.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>btnShaderNext</tabstop>
+  <tabstop>btnEditorPrevious</tabstop>
+  <tabstop>btnEditorNext</tabstop>
+  <tabstop>btnTexturePrevious</tabstop>
+  <tabstop>btnTextureNext</tabstop>
+  <tabstop>btnMeshPrevious</tabstop>
+  <tabstop>btnMeshNext</tabstop>
+  <tabstop>btnCompile</tabstop>
+  <tabstop>btnShaderPrevious</tabstop>
+  <tabstop>pteShaderCode</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+ <slots>
+  <slot>handleShaderNext()</slot>
+  <slot>handleShaderPrevious()</slot>
+  <slot>handleRefresh()</slot>
+  <slot>handleCompile()</slot>
+  <slot>handleVertexToggle(bool)</slot>
+  <slot>handleEvaluationToggle(bool)</slot>
+  <slot>handleControlToggle(bool)</slot>
+  <slot>handleGeometryToggle(bool)</slot>
+  <slot>handleFragmentToggle(bool)</slot>
+  <slot>handleMeshNext()</slot>
+  <slot>handleMeshPrevious()</slot>
+  <slot>handleTextureNext()</slot>
+  <slot>handleTexturePrevious()</slot>
+  <slot>handleEditorNext()</slot>
+  <slot>handleEditorPrevious()</slot>
+ </slots>
+</ui>
