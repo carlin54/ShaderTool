@@ -21,6 +21,7 @@ ShaderFrame::ShaderFrame(QWidget* parent)
     ,   dsbScaleY(nullptr)
     ,   dsbScaleZ(nullptr)
 {
+
     defaultUniforms();
     m_Time.start();
 }
@@ -45,7 +46,7 @@ void ShaderFrame::updateMesh(){
                 m_Editor->program().setAttributeBuffer("position", GL_FLOAT, 0, 3);
                 m_Mesh->mVboVerts.release();
             }else{
-                // std::cerr << "position found in mesh but not shader" << std::endl;
+                //std::cerr << "position found in mesh but not shader" << std::endl;
             }
         }
 
@@ -57,7 +58,7 @@ void ShaderFrame::updateMesh(){
                 m_Editor->program().setAttributeBuffer("normal", GL_FLOAT, 0, 3);
                 m_Mesh->mVboNormals.release();
             }else{
-                // std::cerr << "normal found in mesh but not shader" << std::endl;
+                //std::cerr << "normal found in mesh but not shader" << std::endl;
             }
         }
 
@@ -68,7 +69,7 @@ void ShaderFrame::updateMesh(){
                 m_Editor->program().setAttributeBuffer("color", GL_FLOAT, 0, 4);
                 m_Mesh->mVboColors.release();
             }else{
-                // std::cerr << "color found in mesh but not shader" << std::endl;
+                //std::cerr << "color found in mesh but not shader" << std::endl;
             }
         }
 
@@ -79,7 +80,7 @@ void ShaderFrame::updateMesh(){
                 m_Editor->program().setAttributeBuffer("texture_coord", GL_FLOAT, 0, 2);
                 m_Mesh->mVboTexCoords.release();
             }else{
-                // std::cerr << "texture_coord found in mesh but not shader" << std::endl;
+                //std::cerr << "texture_coord found in mesh but not shader" << std::endl;
             }
         }
         m_Mesh->ConnectVao();
@@ -156,11 +157,16 @@ void ShaderFrame::defaultUniforms(){
 }
 
 void ShaderFrame::initializeGL(){
+    this->makeCurrent();
     initializeOpenGLFunctions();
     glEnable(GL_DEPTH_TEST);
-    m_ClearColor = QVector4D(0.5, 0.5, 0.5, 0.5);
+    glEnable(GL_CULL_FACE);
+    m_ClearColor = QVector4D(0.5, 0.5, 0.5, 1.0);
+    glClearColor(m_ClearColor.x(), m_ClearColor.y(), m_ClearColor.z(), m_ClearColor.w());
+    this->doneCurrent();
 }
 void ShaderFrame::paintGL(){
+    //this->makeCurrent();
     mUniforms.mFrame++;
 
     mUniforms.mElapsed = m_Time.elapsed();
@@ -168,35 +174,43 @@ void ShaderFrame::paintGL(){
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glClearColor(m_ClearColor.x(), m_ClearColor.y(), m_ClearColor.z(), m_ClearColor.w());
-
-
     if(hasProgram() && hasMesh()){
-
-        updateMesh();
+        std::cout << "test! " << mUniforms.mFrame << std::endl;
         assert(m_Editor->program().isLinked());
         assert(m_Editor->program().bind());
-            refreshUniforms();
-            pushUniforms();
-            if(hasTexture()) m_Texture->bind();
-                m_Mesh->mVao.bind();
-                    if(m_Editor->requiresPatches()){
-                        glDrawElements(GL_PATCHES, m_Mesh->mNumIndices, GL_UNSIGNED_INT, (void*)0);
-                    }else{
-                        glDrawElements(GL_TRIANGLES, m_Mesh->mNumIndices, GL_UNSIGNED_INT, (void*)0);
-                    }
-                m_Mesh->mVao.release();
-            if(hasTexture()) m_Texture->release();
-       m_Editor->program().release();
+
+        updateMesh();
+        refreshUniforms();
+        pushUniforms();
+
+        if(hasTexture())
+            m_Texture->bind();
+
+        m_Mesh->mVao.bind();
+        if(m_Editor->requiresPatches()){
+            glDrawElements(GL_PATCHES, m_Mesh->mNumIndices, GL_UNSIGNED_INT, (void*)0);
+        }else{
+            glDrawElements(GL_TRIANGLES, m_Mesh->mNumIndices, GL_UNSIGNED_INT, (void*)0);
+        }
+        m_Mesh->mVao.release();
+
+        if(hasTexture())
+            m_Texture->release();
+
+        m_Editor->program().release();
     }
 
 
     update();
+
+    //this->doneCurrent();
 }
 void ShaderFrame::resizeGL(int w, int h){
+    this->makeCurrent();
     mUniforms.mWidth = w;
     mUniforms.mHeight = h;
     update();
+    this->doneCurrent();
 }
 
 float ShaderFrame::getAspectRatio()                     { return (float)mUniforms.mWidth / (float)mUniforms.mHeight;           }
@@ -221,17 +235,14 @@ void ShaderFrame::setMesh(Mesh* set)                    { m_Mesh = set;  updateM
 void ShaderFrame::setTexture(QOpenGLTexture* set)       { m_Texture = set;                      }
 
 void ShaderFrame::mousePressEvent(QMouseEvent* mouse){
-
     if(mouse->button() == Qt::MouseButton::LeftButton){
         updatePressMouse(mouse->x(), mouse->y());
         isMouseLeftButtonDown = true;
     }
-    updateDoubleSpinBoxes();
     refreshCamera();
 }
 void ShaderFrame::mouseMoveEvent(QMouseEvent* mouse){
         updateMouse(mouse->x(), mouse->y());
-        updateDoubleSpinBoxes();
         refreshCamera();
 }
 void ShaderFrame::mouseReleaseEvent(QMouseEvent* mouse){
@@ -281,43 +292,28 @@ void ShaderFrame::setRotateDSB(QDoubleSpinBox* rx, QDoubleSpinBox* ry, QDoubleSp
 void ShaderFrame::updateDoubleSpinBoxes(){
     if(hasMesh()){
 
-        if(dsbTranslateX != nullptr && dsbTranslateX->isEnabled()){dsbTranslateX->setValue(getMesh().mTranslation.x());  dsbTranslateX->editingFinished();}
-        if(dsbTranslateY != nullptr && dsbTranslateY->isEnabled()){dsbTranslateY->setValue(getMesh().mTranslation.y());  dsbTranslateY->editingFinished();}
-        if(dsbTranslateZ != nullptr && dsbTranslateZ->isEnabled()){dsbTranslateZ->setValue(getMesh().mTranslation.z());  dsbTranslateZ->editingFinished();}
+        if(dsbTranslateX != nullptr && dsbTranslateX->isEnabled())
+            {dsbTranslateX->setValue(getMesh().mTranslation.x());  dsbTranslateX->editingFinished();}
+        if(dsbTranslateY != nullptr && dsbTranslateY->isEnabled())
+            {dsbTranslateY->setValue(getMesh().mTranslation.y());  dsbTranslateY->editingFinished();}
+        if(dsbTranslateZ != nullptr && dsbTranslateZ->isEnabled())
+            {dsbTranslateZ->setValue(getMesh().mTranslation.z());  dsbTranslateZ->editingFinished();}
 
-        if(dsbRotateX != nullptr && dsbRotateX->isEnabled()){dsbRotateX->setValue((int)getMesh().mRotation.x() % 360);  dsbRotateX->editingFinished();}
-        if(dsbRotateY != nullptr && dsbRotateY->isEnabled()){dsbRotateY->setValue((int)getMesh().mRotation.y() % 360);  dsbRotateY->editingFinished();}
-        if(dsbRotateZ != nullptr && dsbRotateZ->isEnabled()){dsbRotateZ->setValue((int)getMesh().mRotation.z() % 360);  dsbRotateZ->editingFinished();}
+        if(dsbRotateX != nullptr && dsbRotateX->isEnabled())
+            {dsbRotateX->setValue((int)getMesh().mRotation.x() % 360);  dsbRotateX->editingFinished();}
+        if(dsbRotateY != nullptr && dsbRotateY->isEnabled())
+            {dsbRotateY->setValue((int)getMesh().mRotation.y() % 360);  dsbRotateY->editingFinished();}
+        if(dsbRotateZ != nullptr && dsbRotateZ->isEnabled())
+            {dsbRotateZ->setValue((int)getMesh().mRotation.z() % 360);  dsbRotateZ->editingFinished();}
 
-        if(dsbScaleX != nullptr && dsbScaleX->isEnabled()) {dsbScaleX->setValue(getMesh().mScale.x()); dsbScaleX->editingFinished();}
-        if(dsbScaleY != nullptr && dsbScaleY->isEnabled()) {dsbScaleY->setValue(getMesh().mScale.y()); dsbScaleY->editingFinished();}
-        if(dsbScaleZ != nullptr && dsbScaleZ->isEnabled()) {dsbScaleZ->setValue(getMesh().mScale.z()); dsbScaleZ->editingFinished();}
+        if(dsbScaleX != nullptr && dsbScaleX->isEnabled())
+            {dsbScaleX->setValue(getMesh().mScale.x()); dsbScaleX->editingFinished();}
+        if(dsbScaleY != nullptr && dsbScaleY->isEnabled())
+            {dsbScaleY->setValue(getMesh().mScale.y()); dsbScaleY->editingFinished();}
+        if(dsbScaleZ != nullptr && dsbScaleZ->isEnabled())
+            {dsbScaleZ->setValue(getMesh().mScale.z()); dsbScaleZ->editingFinished();}
 
     }
 }
 
-/*
-Q_ASSERT(m_vbo_position.create());
-m_vbo_position.setUsagePattern(QOpenGLBuffer::StaticDraw);
-m_vbo_position.bind();
-m_vbo_position.allocate(positions, sizeof(positions));
-m_vbo_position.release();
 
-Q_ASSERT(m_ibo_indices.create());
-m_ibo_indices.setUsagePattern(QOpenGLBuffer::StaticDraw);
-m_ibo_indices.bind();
-m_ibo_indices.allocate(indices, sizeof(indices));
-m_ibo_indices.release();
-
-
-Q_ASSERT(m_vao_triangle.create());
-m_vao_triangle.bind();
-
-    m_vbo_position.bind();
-    m_program->enableAttributeArray("position");
-    m_program->setAttributeBuffer("position", GL_FLOAT, 0, 3);
-
-    m_ibo_indices.bind();
-
-m_vao_triangle.release();
-*/

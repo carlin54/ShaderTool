@@ -8,7 +8,8 @@
 #include <QDesktopWidget>
 #include <QFileDialog>
 #include <QOpenGLShaderProgram>
-#include "assimp/Importer.hpp"
+#include <QMessageBox>
+#include <assimp/Importer.hpp>
 #include "shadereditor.h"
 #include "glslhighlighter.h"
 #include "mesh.h"

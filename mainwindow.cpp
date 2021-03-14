@@ -630,8 +630,12 @@ void MainWindow::handleCompile(){
         std::cout << "SUCCESS!!!" << std::endl;
         ui->shaderframe->setEditor(getEditor());
     }catch(QString error){
-         std::cerr << error.toStdString() << std::endl;
+        QMessageBox messageBox;
+        messageBox.critical(this,"Compilation Error",error);
+        messageBox.setFixedSize(500,200);
+        std::cerr << error.toStdString() << std::endl;
     }
+
 
 
 }
@@ -729,7 +733,7 @@ void MainWindow::handleAddShaderBlingPhong(){
     m_iE = m_Editors.size()-1;
 }
 void MainWindow::handleAddShaderCookTorr(){
-    QString vert = GLSL(130,
+    QString vert = GLSL(140,
         \nuniform mat4 P;
         \nuniform mat4 V;
         \nuniform mat4 M;
@@ -754,51 +758,51 @@ void MainWindow::handleAddShaderCookTorr(){
         \n
     );
 
-    QString frag = GLSL(130,
+    QString frag = GLSL(140,
 
-        uniform vec3 light_pos = vec3(30.0, 0.0, 0.0);
+        \nuniform vec3 light_pos = vec3(30.0, 0.0, 0.0);
 
-        uniform vec4 ka = vec4(0.13, 0.13, 0.13, 1.0);
-        uniform vec4 La = vec4(1.0, 1.0, 1.0, 1.0);
+        \nuniform vec4 ka = vec4(0.13, 0.13, 0.13, 1.0);
+        \nuniform vec4 La = vec4(1.0, 1.0, 1.0, 1.0);
 
-        uniform vec4 kd = vec4(0.7, 1.0, 0.7, 1.0);
-        uniform vec4 Ld = vec4(1.0, 1.0, 1.0, 1.0);
+        \nuniform vec4 kd = vec4(0.7, 1.0, 0.7, 1.0);
+        \nuniform vec4 Ld = vec4(1.0, 1.0, 1.0, 1.0);
 
-        uniform vec4 ks = vec4(0.5, 0.5, 0.5, 1.0);
-        uniform vec4 Ls = vec4(1.0, 1.0, 1.0, 1.0);
+        \nuniform vec4 ks = vec4(0.5, 0.5, 0.5, 1.0);
+        \nuniform vec4 Ls = vec4(1.0, 1.0, 1.0, 1.0);
 
-        in vec3 n_vs;
-        in vec4 p_vs;
-        in vec4 cam_pos_vs;
+        \nin vec3 n_vs;
+        \nin vec4 p_vs;
+        \nin vec4 cam_pos_vs;
 
-        out vec4 fragcolor;
+        \nout vec4 fragcolor;
 
-        uniform float IOR = 1.0;
-        uniform float m = 2.0;
+        \nuniform float IOR = 1.0;
+        \nuniform float m = 2.0;
 
-        void main()
-        {
-            vec3 n = normalize(n_vs);
-            vec3 l = normalize(light_pos - p_vs.xyz);
-            vec3 v = normalize(cam_pos_vs.xyz - p_vs.xyz);
-            vec3 r = reflect(-l, n);
-            vec3 h = (l+v)/normalize(l+v);
-            float c = dot(v,h);
-            float g = sqrt(pow(IOR, 2.0) + pow(c, 2.0) - 1);
-            float alpha = acos(dot(n, h));
-            float flm = pow(((1-IOR)/(1+IOR)),2.0);
-            float F = 1;
-            float D = 1;
-            float G = 1;
+        \nvoid main()
+        \n{
+        \n\tvec3 n = normalize(n_vs);
+        \n\tvec3 l = normalize(light_pos - p_vs.xyz);
+        \n\tvec3 v = normalize(cam_pos_vs.xyz - p_vs.xyz);
+        \n\tvec3 r = reflect(-l, n);
+        \n\tvec3 h = (l+v)/normalize(l+v);
+        \n\tfloat c = dot(v,h);
+        \n\tfloat g = sqrt(pow(IOR, 2.0) + pow(c, 2.0) - 1);
+        \n\tfloat alpha = acos(dot(n, h));
+        \n\tfloat flm = pow(((1-IOR)/(1+IOR)),2.0);
+        \n\tfloat F = 1;
+        \n\tfloat D = 1;
+        \n\tfloat G = 1;
 
-            G =	min((2 * dot(n, h) * dot(n, v))/dot(v, h), (2 * dot(n, h) * dot(n, l))/dot(v, h));
-            fragcolor = ks*Ls*G;
+        \n\tG =	min((2 * dot(n, h) * dot(n, v))/dot(v, h), (2 * dot(n, h) * dot(n, l))/dot(v, h));
+        \n\tfragcolor = ks*Ls*G;
 
-            F = flm+(1-flm)*(1-pow(dot(n,v), 5.0));
-            D = exp(pow(-(tan(alpha)/m),2.0))/(4*pow(m,2.0)*pow(dot(n,h), 4.0));
-            G =	min((2 * dot(n, h) * dot(n, v))/dot(v, h), (2 * dot(n, h) * dot(n, l))/dot(v, h));
-            fragcolor = ka*La + kd*Ld*max(dot(n, l), 0.0) + ks * Ls * ((F * D * G)/ ( 3.14 * dot(n, l) * dot(n, v) ) );
-        }
+        \n\tF = flm+(1-flm)*(1-pow(dot(n,v), 5.0));
+        \n\tD = exp(pow(-(tan(alpha)/m),2.0))/(4*pow(m,2.0)*pow(dot(n,h), 4.0));
+        \n\tG =	min((2 * dot(n, h) * dot(n, v))/dot(v, h), (2 * dot(n, h) * dot(n, l))/dot(v, h));
+        \n\tfragcolor = ka*La + kd*Ld*max(dot(n, l), 0.0) + ks * Ls * ((F * D * G)/ ( 3.14 * dot(n, l) * dot(n, v) ) );
+        \n}
     );
 
     ShaderEditor* shader_phong = new ShaderEditor(vert,"","","",frag);

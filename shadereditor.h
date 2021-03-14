@@ -7,7 +7,6 @@
 #include <QOpenGLShaderProgram>
 #include <iostream>
 #include "mesh.h"
-#include "shadereditor.h"
 
 #define NUM_TYPES_SHADERS 5
 

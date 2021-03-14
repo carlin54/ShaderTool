@@ -74,8 +74,8 @@ void ShaderEditor::compile() throw(QString)
     }
     std::cout << std::endl;
     std::cout << "Linking... ";
-    newProgram->link();
-    if(newProgram->log() != ""){
+
+    if(!newProgram->link()){
         throw QString(newProgram->log());
     }else{
         if(m_Program != nullptr){
