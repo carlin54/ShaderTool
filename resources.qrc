@@ -1,0 +1,21 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/examples/basics">
+        <file alias="hello.json">resources/examples/basics/hello.json</file>
+        <file alias="warm.json">resources/examples/basics/warm.json</file>
+        <file alias="mesh_obj.json">resources/examples/basics/mesh_obj.json</file>
+    </qresource>
+    <qresource prefix="/examples/rt">
+        <file alias="minimal.json">resources/examples/rt/minimal.json</file>
+    </qresource>
+    <qresource prefix="/include">
+        <file alias="host_catalog.hlsl">resources/include/host_catalog.hlsl</file>
+    </qresource>
+    <qresource prefix="/schema">
+        <file alias="shaderproject.schema.json">schema/shaderproject.schema.json</file>
+    </qresource>
+    <qresource prefix="/shaders">
+        <file alias="blit.vert.spv">resources/shaders/blit.vert.spv</file>
+        <file alias="blit.frag.spv">resources/shaders/blit.frag.spv</file>
+    </qresource>
+</RCC>

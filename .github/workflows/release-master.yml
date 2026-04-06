@@ -1,0 +1,109 @@
+name: Release (master)
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  linux-portable:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build qt6-base-dev libgl-dev libvulkan-dev libxkbcommon-dev curl patchelf
+
+      - name: Configure and build
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j
+
+      - name: Build portable bundle (linuxdeploy)
+        run: |
+          mkdir -p tools
+          curl -L -o tools/linuxdeploy.AppImage https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          curl -L -o tools/linuxdeploy-plugin-qt.AppImage https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+          chmod +x tools/linuxdeploy.AppImage tools/linuxdeploy-plugin-qt.AppImage
+          ln -sf "$PWD/tools/linuxdeploy.AppImage" tools/linuxdeploy
+          ln -sf "$PWD/tools/linuxdeploy-plugin-qt.AppImage" tools/linuxdeploy-plugin-qt
+          export PATH="$PWD/tools:$PATH"
+          export APPIMAGE_EXTRACT_AND_RUN=1
+          export LINUXDEPLOY_PLUGIN_QT="$PWD/tools/linuxdeploy-plugin-qt"
+          ./scripts/deploy_linux.sh ./build/ShaderTool ./dist/linux
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-linux-portable
+          path: dist/linux/ShaderTool-linux-portable.tar.gz
+
+  windows-portable:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Install dependencies
+        run: |
+          choco install ninja --yes
+          choco install vulkan-sdk --yes
+
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.6.3'
+          arch: 'win64_msvc2019_64'
+          cache: true
+
+      - name: Configure and build
+        shell: cmd
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=%Qt6_DIR%\..\..\..
+          cmake --build build -j
+
+      - name: Build portable bundle (windeployqt)
+        shell: cmd
+        run: |
+          call scripts\deploy_windows.bat build\ShaderTool.exe dist\windows
+
+      - name: Zip portable folder
+        shell: powershell
+        run: |
+          Compress-Archive -Path dist/windows/* -DestinationPath dist/ShaderTool-windows-portable.zip -Force
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-windows-portable
+          path: dist/ShaderTool-windows-portable.zip
+
+  publish-release:
+    runs-on: ubuntu-22.04
+    needs: [linux-portable, windows-portable]
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          merge-multiple: true
+          path: dist-release
+
+      - name: Publish/Update "latest" release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: latest
+          name: Latest master build
+          body: |
+            Automated portable builds from the latest push to `master`.
+            These assets are replaced on every new master build.
+          allowUpdates: true
+          artifactErrorsFailBuild: true
+          removeArtifacts: true
+          artifacts: "dist-release/*"
+          prerelease: true

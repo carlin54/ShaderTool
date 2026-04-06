@@ -1,0 +1,20 @@
+ShaderTool — third-party notices
+
+This project is licensed under the MIT License (see LICENSE).
+
+Third-party components that are linked or used at runtime (not shipped as part
+of this repository’s source tree) may include:
+
+- Qt (https://www.qt.io/) — LGPL v3 or commercial license; see Qt licensing
+  documentation for distribution obligations when linking dynamically.
+- Vulkan API headers and loader — typically Apache-2.0–style terms from Khronos.
+- DirectX Shader Compiler (DXC) — LLVM-style license from Microsoft when you
+  install or ship the `dxc` / `dxcompiler` binary; add a copy of the
+  compiler’s license next to any redistributed binaries.
+  ShaderTool invokes the **`dxc` CLI** (subprocess). If `dxc` is not on `PATH`,
+  set the environment variable **`SHADERTOOL_DXC`** to the full path of the
+  `dxc` executable. A future version may optionally load **`dxcompiler`** as a
+  shared library instead; CMake variable **`SHADERTOOL_DXC_LIB`** is reserved
+  for that (not used by the build today).
+
+Update this file when you bundle additional binaries or vendor code.

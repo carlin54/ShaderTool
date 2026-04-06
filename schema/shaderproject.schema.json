@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shadertool.local/schema/shaderproject.schema.json",
+  "title": "ShaderTool project",
+  "type": "object",
+  "required": ["formatVersion", "pipelineKind", "stages"],
+  "properties": {
+    "formatVersion": { "type": "integer", "minimum": 1 },
+    "hostUniformCatalogVersion": { "type": "integer", "minimum": 1 },
+    "name": { "type": "string" },
+    "language": { "type": "string", "const": "hlsl" },
+    "pipelineKind": { "type": "string", "enum": ["raster", "raytrace"] },
+    "meshPath": { "type": "string", "description": "Optional OBJ path relative to the project file." },
+    "maxPipelineRayRecursionDepth": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 31,
+      "description": "Ray trace only: optional cap for maxPipelineRayRecursionDepth (0 = engine default)."
+    },
+    "textures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" },
+          "slot": { "type": "integer", "minimum": 0 }
+        },
+        "required": ["path"]
+      }
+    },
+    "stages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["stage", "entryPoint", "source"],
+        "properties": {
+          "stage": { "type": "string" },
+          "entryPoint": { "type": "string" },
+          "source": { "type": "string" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,110 @@
+# ------------------------------------------------------------------------------
+# ShaderTool — generated files, local tooling, and build trees
+# ------------------------------------------------------------------------------
+
+# Local planning docs (keep your own copy under .plan/)
+.plan/
+
+# Editor / OS
+*~
+*.autosave
+.#*
+*.*#
+.DS_Store
+.directory
+Thumbs.db
+.*.swp
+*.flc
+
+# Qt / moc / rcc (when generated outside CMake build dir)
+*.moc
+moc_*.cpp
+ui_*.h
+qrc_*.cpp
+*.qm
+
+# Qt Creator / CMake user presets
+*.user
+*.user.*
+CMakeLists.txt.user*
+CMakeUserPresets.json
+
+# JetBrains / VS Code (local IDE state)
+.idea/
+.vscode/
+*.code-workspace
+
+# qmake
+/.qmake.cache
+/.qmake.stash
+*.prl
+Makefile*
+
+# Build outputs — CMake / Ninja
+build/
+cmake-build-*/
+out/
+out-*/
+[Bb]in/
+[Oo]bj/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+_deps/
+*.ninja
+.ninja_*
+build.ninja
+rules.ninja
+
+# FetchContent / external deps (if populated under source tree)
+**/spirv_reflect_src*/
+
+# Compiled artifacts
+*.o
+*.obj
+*.a
+*.so
+*.so.*
+*.dll
+*.exe
+*.lib
+*.pdb
+*.ilk
+*.idb
+*.ib_pdb_index
+*.debug
+*.res
+*.rc
+*_pch.h.cpp
+*_resource.rc
+*.orig
+*.rej
+*.core
+core
+!core/
+
+# Visual Studio
+*.sln
+*.suo
+*.vcproj
+*vcproj.*.*.user
+*.ncb
+*.sdf
+*.opensdf
+*.vcxproj
+*vcxproj.*
+*.opensdf
+
+# MinGW
+*.Debug
+*.Release
+
+# Python
+*.pyc
+__pycache__/
+
+# Misc
+tags
+compile_commands.json
