@@ -3,13 +3,14 @@
   "$id": "https://shadertool.local/schema/shaderproject.schema.json",
   "title": "ShaderTool project",
   "type": "object",
-  "required": ["formatVersion", "pipelineKind", "stages"],
+  "required": ["formatVersion", "pipelineKind"],
   "properties": {
     "formatVersion": { "type": "integer", "minimum": 1 },
     "hostUniformCatalogVersion": { "type": "integer", "minimum": 1 },
     "name": { "type": "string" },
     "language": { "type": "string", "const": "hlsl" },
-    "pipelineKind": { "type": "string", "enum": ["raster", "raytrace"] },
+    "pipelineKind": { "type": "string", "enum": ["raster", "raytrace", "compute"] },
+    "blend": { "type": "string", "enum": ["off", "alpha", "additive"] },
     "meshPath": { "type": "string", "description": "Optional OBJ path relative to the project file." },
     "maxPipelineRayRecursionDepth": {
       "type": "integer",
@@ -39,6 +40,35 @@
           "source": { "type": "string" }
         }
       }
+    },
+    "passes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "stages"],
+        "properties": {
+          "name": { "type": "string" },
+          "output": { "type": "string", "enum": ["offscreen", "swapchain"] },
+          "resolution": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+          "inputs": { "type": "array", "items": { "type": "string" } },
+          "stages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["stage", "entryPoint", "source"],
+              "properties": {
+                "stage": { "type": "string" },
+                "entryPoint": { "type": "string" },
+                "source": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
     }
-  }
+  },
+  "oneOf": [
+    { "required": ["stages"] },
+    { "required": ["passes"] }
+  ]
 }

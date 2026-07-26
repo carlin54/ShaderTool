@@ -7,16 +7,19 @@
 #include "shaderproject.h"
 
 class QCloseEvent;
+class QLabel;
 class QTextEdit;
 class QVulkanInstance;
 class PreviewVulkanWindow;
 class RtPreviewWindow;
+class ComputePreviewWindow;
 class QStackedWidget;
 class QAction;
 class QMenu;
 class QTabWidget;
 class QComboBox;
 class QLineEdit;
+class QListWidget;
 class StagePage;
 
 class MainWindow : public QMainWindow
@@ -46,6 +49,9 @@ private slots:
     void removeCurrentStage();
     void findInEditor();
     void findNext();
+    void addTexture();
+    void removeTexture();
+    void exportBundle();
 
 private:
     void setupDefaultUi();
@@ -56,7 +62,10 @@ private:
     QString snapshotKey() const;
     void tryCompileAndUpload(bool showErrors);
     void compileRaytraceProject(bool showErrors);
+    void compileComputeProject(bool showErrors);
     void updateCompileUi();
+    void setCompileStatus(bool ok);
+    void updateMeshStatus();
     void updatePreviewStackForPipelineKind();
     void addRecentFile(const QString &path);
     void rebuildRecentMenu();
@@ -66,11 +75,16 @@ private:
     QVulkanInstance *m_vulkanInstance = nullptr;
     PreviewVulkanWindow *m_previewWindow = nullptr;
     RtPreviewWindow *m_rtPreviewWindow = nullptr;
+    ComputePreviewWindow *m_computePreviewWindow = nullptr;
     QStackedWidget *m_previewStack = nullptr;
 
     QTabWidget *m_stageTabs = nullptr;
     QComboBox *m_pipelineKindCombo = nullptr;
-    QLineEdit *m_meshPathEdit = nullptr;
+    QComboBox *m_blendCombo = nullptr;
+    QLabel *m_meshNameLabel = nullptr;
+    QLabel *m_meshStatusIcon = nullptr;
+    QString m_meshAbsolutePath;
+    bool m_shaderNeedsMesh = false;
     QTextEdit *m_compileLog = nullptr;
 
     QString m_currentPath;
@@ -79,9 +93,13 @@ private:
 
     ShaderProject m_loadedProject;
 
+    QListWidget *m_textureList = nullptr;
+
     QAction *m_compileAction = nullptr;
+    QLabel *m_compileStatusIcon = nullptr;
     QMenu *m_recentMenu = nullptr;
     QString m_lastFindString;
+    QString m_bundleTempDir;
 };
 
 #endif

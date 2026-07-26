@@ -1,0 +1,43 @@
+{
+    "formatVersion": 1,
+    "hostUniformCatalogVersion": 1,
+    "name": "Multipass / Deferred Shading",
+    "pipelineKind": "raster",
+    "language": "hlsl",
+    "passes": [
+        {
+            "name": "gbuffer",
+            "output": "offscreen",
+            "resolution": [1.0, 1.0],
+            "stages": [
+                {
+                    "stage": "vertex",
+                    "entryPoint": "VSMain",
+                    "source": "struct VSOut { float4 pos : SV_POSITION; float2 uv : TEXCOORD0; };\nVSOut VSMain(uint vid : SV_VertexID)\n{\n    VSOut o;\n    float2 uv = float2((vid << 1) & 2, vid & 2);\n    o.pos = float4(uv * 2.0 - 1.0, 0.0, 1.0);\n    o.uv = uv;\n    o.uv.y = 1.0 - o.uv.y;\n    return o;\n}\n"
+                },
+                {
+                    "stage": "fragment",
+                    "entryPoint": "PSGBuffer",
+                    "source": "cbuffer Host : register(b0)\n{\n    float time_sim_ms;\n    float time_wall_ms;\n    float delta_time_ms;\n    uint  frame_index;\n    float resolution_x;\n    float resolution_y;\n    float mouse_x;\n    float mouse_y;\n    uint  mouse_buttons;\n    float scroll_delta_x;\n    float scroll_delta_y;\n    float drag_accum_x;\n    float drag_accum_y;\n    float scroll_accum_x;\n    float scroll_accum_y;\n};\nstruct VSOut { float4 pos : SV_POSITION; float2 uv : TEXCOORD0; };\n\nfloat4 PSGBuffer(VSOut i) : SV_Target\n{\n    float2 uv = i.uv;\n    float t = time_sim_ms * 0.001;\n    float3 normal = normalize(float3(sin(uv.x * 6.28 + t), cos(uv.y * 6.28 + t * 0.5), 1.0));\n    normal = normal * 0.5 + 0.5;\n    return float4(normal, 1.0);\n}\n"
+                }
+            ]
+        },
+        {
+            "name": "lighting",
+            "output": "swapchain",
+            "inputs": ["gbuffer"],
+            "stages": [
+                {
+                    "stage": "vertex",
+                    "entryPoint": "VSMain",
+                    "source": "struct VSOut { float4 pos : SV_POSITION; float2 uv : TEXCOORD0; };\nVSOut VSMain(uint vid : SV_VertexID)\n{\n    VSOut o;\n    float2 uv = float2((vid << 1) & 2, vid & 2);\n    o.pos = float4(uv * 2.0 - 1.0, 0.0, 1.0);\n    o.uv = uv;\n    o.uv.y = 1.0 - o.uv.y;\n    return o;\n}\n"
+                },
+                {
+                    "stage": "fragment",
+                    "entryPoint": "PSLighting",
+                    "source": "cbuffer Host : register(b0)\n{\n    float time_sim_ms;\n    float time_wall_ms;\n    float delta_time_ms;\n    uint  frame_index;\n    float resolution_x;\n    float resolution_y;\n    float mouse_x;\n    float mouse_y;\n    uint  mouse_buttons;\n    float scroll_delta_x;\n    float scroll_delta_y;\n    float drag_accum_x;\n    float drag_accum_y;\n    float scroll_accum_x;\n    float scroll_accum_y;\n};\n\n[[vk::combinedImageSampler]] [[vk::binding(0, 2)]]\nTexture2D gbufferTex : register(t0, space2);\n[[vk::combinedImageSampler]] [[vk::binding(0, 2)]]\nSamplerState gbufferSamp : register(s0, space2);\n\nstruct VSOut { float4 pos : SV_POSITION; float2 uv : TEXCOORD0; };\n\nfloat4 PSLighting(VSOut i) : SV_Target\n{\n    float3 normal = gbufferTex.Sample(gbufferSamp, i.uv).rgb * 2.0 - 1.0;\n    normal = normalize(normal);\n\n    float2 lightPos = float2(mouse_x / resolution_x, mouse_y / resolution_y);\n    float3 lightDir = normalize(float3(lightPos - i.uv, 0.5));\n\n    float diff = saturate(dot(normal, lightDir));\n    float3 albedo = float3(0.8, 0.6, 0.4);\n    float3 color = albedo * (diff * 0.8 + 0.2);\n    return float4(color, 1.0);\n}\n"
+                }
+            ]
+        }
+    ]
+}

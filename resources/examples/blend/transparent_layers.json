@@ -1,0 +1,20 @@
+{
+    "formatVersion": 1,
+    "hostUniformCatalogVersion": 1,
+    "name": "Blending / Transparent Layers",
+    "pipelineKind": "raster",
+    "blend": "alpha",
+    "language": "hlsl",
+    "stages": [
+        {
+            "stage": "vertex",
+            "entryPoint": "VSMain",
+            "source": "struct VSOut\n{\n    float4 pos : SV_POSITION;\n    float2 uv  : TEXCOORD0;\n};\n\nVSOut VSMain(uint vid : SV_VertexID)\n{\n    VSOut o;\n    float2 uv = float2((vid << 1) & 2, vid & 2);\n    o.pos = float4(uv * 2.0 - 1.0, 0.0, 1.0);\n    o.uv = uv;\n    o.uv.y = 1.0 - o.uv.y;\n    return o;\n}\n"
+        },
+        {
+            "stage": "fragment",
+            "entryPoint": "PSMain",
+            "source": "cbuffer Host : register(b0)\n{\n    float time_sim_ms;\n    float time_wall_ms;\n    float delta_time_ms;\n    uint  frame_index;\n    float resolution_x;\n    float resolution_y;\n    float mouse_x;\n    float mouse_y;\n    uint  mouse_buttons;\n    float scroll_delta_x;\n    float scroll_delta_y;\n    float drag_accum_x;\n    float drag_accum_y;\n    float scroll_accum_x;\n    float scroll_accum_y;\n    float pan_accum_x;\n    float pan_accum_y;\n};\n\nstruct VSOut\n{\n    float4 pos : SV_POSITION;\n    float2 uv  : TEXCOORD0;\n};\n\nfloat4 PSMain(VSOut i) : SV_Target\n{\n    float2 uv = i.uv;\n    float t = time_sim_ms * 0.001;\n\n    float3 bg = float3(0.1, 0.1, 0.15);\n\n    float4 layer1 = float4(0.8, 0.2, 0.2, 0.0);\n    float2 c1 = float2(0.35 + 0.1 * sin(t), 0.5);\n    float d1 = length(uv - c1);\n    if (d1 < 0.25) layer1.a = 0.6 * smoothstep(0.25, 0.15, d1);\n\n    float4 layer2 = float4(0.2, 0.7, 0.3, 0.0);\n    float2 c2 = float2(0.5, 0.5 + 0.1 * cos(t * 1.3));\n    float d2 = length(uv - c2);\n    if (d2 < 0.25) layer2.a = 0.6 * smoothstep(0.25, 0.15, d2);\n\n    float4 layer3 = float4(0.2, 0.3, 0.9, 0.0);\n    float2 c3 = float2(0.65 - 0.1 * sin(t * 0.8), 0.5);\n    float d3 = length(uv - c3);\n    if (d3 < 0.25) layer3.a = 0.6 * smoothstep(0.25, 0.15, d3);\n\n    float3 color = bg;\n    color = lerp(color, layer1.rgb, layer1.a);\n    color = lerp(color, layer2.rgb, layer2.a);\n    color = lerp(color, layer3.rgb, layer3.a);\n\n    float alpha = saturate(layer1.a + layer2.a + layer3.a);\n    return float4(color, max(alpha, 0.3));\n}\n"
+        }
+    ]
+}

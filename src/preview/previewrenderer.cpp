@@ -48,7 +48,7 @@ void PreviewRenderer::tryRebuildPipeline()
     reloadMeshIfNeeded(build.meshPath);
 
     const bool meshDraw = m_mesh.indexCount > 0;
-    const VkResult err = m_pipeline.create(m_window, m_df, build.stages, build.textures, meshDraw);
+    const VkResult err = m_pipeline.create(m_window, m_df, build.stages, build.textures, meshDraw, build.blendMode);
     if (err != VK_SUCCESS) {
         qWarning("Pipeline create failed: %d", int(err));
         m_pipelineValid = false;
@@ -102,6 +102,12 @@ void PreviewRenderer::updateHostUniformsForFrame(int frameIndex)
     h.mouse_buttons = w->m_buttons;
     h.scroll_delta_x = w->m_scrollX;
     h.scroll_delta_y = w->m_scrollY;
+    h.drag_accum_x = w->m_dragAccumX;
+    h.drag_accum_y = w->m_dragAccumY;
+    h.scroll_accum_x = w->m_scrollAccumX;
+    h.scroll_accum_y = w->m_scrollAccumY;
+    h.pan_accum_x = w->m_panAccumX;
+    h.pan_accum_y = w->m_panAccumY;
     w->resetFrameScrollDeltas();
 
     VkDevice dev = w->device();

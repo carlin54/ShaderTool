@@ -1,0 +1,14 @@
+{
+    "formatVersion": 1,
+    "hostUniformCatalogVersion": 1,
+    "name": "Compute / Image Blur",
+    "pipelineKind": "compute",
+    "language": "hlsl",
+    "stages": [
+        {
+            "stage": "compute",
+            "entryPoint": "CSMain",
+            "source": "cbuffer Host : register(b0)\n{\n    float time_sim_ms;\n    float time_wall_ms;\n    float delta_time_ms;\n    uint  frame_index;\n    float resolution_x;\n    float resolution_y;\n    float mouse_x;\n    float mouse_y;\n    uint  mouse_buttons;\n    float scroll_delta_x;\n    float scroll_delta_y;\n    float drag_accum_x;\n    float drag_accum_y;\n    float scroll_accum_x;\n    float scroll_accum_y;\n    float pan_accum_x;\n    float pan_accum_y;\n};\n\nRWTexture2D<float4> output : register(u0);\n\nfloat hash(float2 p)\n{\n    return frac(sin(dot(p, float2(12.9898, 78.233))) * 43758.5453);\n}\n\nfloat3 proceduralPattern(float2 uv, float t)\n{\n    float2 p = uv * 10.0;\n    float cx = sin(p.x + t) * cos(p.y * 0.5 + t * 0.7);\n    float cy = cos(p.x * 0.7 - t * 0.3) * sin(p.y + t * 1.1);\n    float v = sin(cx * 3.14159) * cos(cy * 3.14159);\n    float3 col;\n    col.r = saturate(0.5 + 0.5 * sin(v * 6.0));\n    col.g = saturate(0.5 + 0.5 * sin(v * 6.0 + 2.094));\n    col.b = saturate(0.5 + 0.5 * sin(v * 6.0 + 4.189));\n    return col;\n}\n\n[numthreads(8, 8, 1)]\nvoid CSMain(uint3 dtid : SV_DispatchThreadID)\n{\n    uint2 dim;\n    output.GetDimensions(dim.x, dim.y);\n    if (dtid.x >= dim.x || dtid.y >= dim.y)\n        return;\n\n    float2 uv = float2(dtid.xy) / float2(dim);\n    float t = time_sim_ms * 0.001;\n\n    float blurRadius = (mouse_x / resolution_x) * 8.0 + 1.0;\n    int radius = int(blurRadius);\n    if (radius < 1) radius = 1;\n    if (radius > 12) radius = 12;\n\n    float3 sum = float3(0, 0, 0);\n    float weightSum = 0.0;\n    float sigma = float(radius) * 0.5;\n\n    for (int dy = -radius; dy <= radius; dy++) {\n        for (int dx = -radius; dx <= radius; dx++) {\n            float2 sampleUV = (float2(dtid.xy) + float2(dx, dy)) / float2(dim);\n            float w = exp(-(dx*dx + dy*dy) / (2.0 * sigma * sigma));\n            sum += proceduralPattern(sampleUV, t) * w;\n            weightSum += w;\n        }\n    }\n\n    float3 color = sum / weightSum;\n    output[dtid.xy] = float4(color, 1.0);\n}\n"
+        }
+    ]
+}

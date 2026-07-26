@@ -124,6 +124,12 @@ cbuffer Host : register(b0)
     uint  mouse_buttons;
     float scroll_delta_x;
     float scroll_delta_y;
+    float drag_accum_x;
+    float drag_accum_y;
+    float scroll_accum_x;
+    float scroll_accum_y;
+    float pan_accum_x;
+    float pan_accum_y;
 };
 
 struct VSOut {

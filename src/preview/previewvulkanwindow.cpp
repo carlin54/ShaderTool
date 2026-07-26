@@ -18,12 +18,14 @@ void PreviewVulkanWindow::setRasterStages(const QVector<RasterStageBinary> &stag
 }
 
 void PreviewVulkanWindow::setRasterPayload(const QVector<RasterStageBinary> &stages,
-                                           const QVector<QImage> &textures, const QString &meshPath)
+                                           const QVector<QImage> &textures, const QString &meshPath,
+                                           RasterPreviewPipeline::BlendMode blendMode)
 {
     QMutexLocker lock(&m_shaderMutex);
     m_pendingStages = stages;
     m_pendingTextures = textures;
     m_pendingMeshPath = meshPath;
+    m_pendingBlendMode = blendMode;
     m_hasPendingShader = true;
     requestUpdate();
 }
@@ -45,6 +47,7 @@ bool PreviewVulkanWindow::takeRasterPreviewBuild(RasterPreviewBuild *out)
     out->stages = m_pendingStages;
     out->textures = m_pendingTextures;
     out->meshPath = m_pendingMeshPath;
+    out->blendMode = m_pendingBlendMode;
     m_hasPendingShader = false;
     return true;
 }
@@ -75,6 +78,8 @@ bool PreviewVulkanWindow::event(QEvent *e)
         } else {
             m_mouseInside = false;
         }
+
+        const uint32_t prevButtons = m_buttons;
         m_buttons = 0;
         if (me->buttons() & Qt::LeftButton)
             m_buttons |= 1u;
@@ -83,6 +88,28 @@ bool PreviewVulkanWindow::event(QEvent *e)
         if (me->buttons() & Qt::MiddleButton)
             m_buttons |= 4u;
 
+        const bool shiftHeld = me->modifiers() & Qt::ShiftModifier;
+        const bool leftHeld = (m_buttons & 1u) && (prevButtons & 1u);
+        const bool middleHeld = (m_buttons & 4u) && (prevButtons & 4u);
+
+        if (leftHeld && !shiftHeld) {
+            const qreal dx = pos.x() - m_lastDragPos.x();
+            const qreal dy = pos.y() - m_lastDragPos.y();
+            m_dragAccumX += float(dx);
+            m_dragAccumY += float(dy);
+        }
+        if ((m_buttons & 1u) && !shiftHeld)
+            m_lastDragPos = pos;
+
+        if (middleHeld || (leftHeld && shiftHeld)) {
+            const qreal dx = pos.x() - m_lastPanPos.x();
+            const qreal dy = pos.y() - m_lastPanPos.y();
+            m_panAccumX += float(dx);
+            m_panAccumY += float(dy);
+        }
+        if ((m_buttons & 4u) || ((m_buttons & 1u) && shiftHeld))
+            m_lastPanPos = pos;
+
         break;
     }
     case QEvent::Wheel: {
@@ -90,6 +117,8 @@ bool PreviewVulkanWindow::event(QEvent *e)
         const QPoint ad = we->angleDelta();
         m_scrollX += ad.x() / 120.f;
         m_scrollY += ad.y() / 120.f;
+        m_scrollAccumX += ad.x() / 120.f;
+        m_scrollAccumY += ad.y() / 120.f;
         break;
     }
     case QEvent::Resize: {

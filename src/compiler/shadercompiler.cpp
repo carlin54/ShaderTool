@@ -243,6 +243,24 @@ QString ShaderCompiler::findDxcExecutable()
     if (!fromPath.isEmpty())
         return fromPath;
 
+    static const char *candidates[] = {
+        "/usr/bin/dxc",
+        "/usr/local/bin/dxc",
+        "/opt/vulkan/bin/dxc",
+        "/opt/vulkansdk/x86_64/bin/dxc",
+    };
+    for (const char *c : candidates) {
+        if (QFileInfo::exists(QString::fromLatin1(c)))
+            return QString::fromLatin1(c);
+    }
+
+    const QByteArray vulkanSdk = qgetenv("VULKAN_SDK");
+    if (!vulkanSdk.isEmpty()) {
+        const QString sdkDxc = QDir(QString::fromLocal8Bit(vulkanSdk)).filePath(QStringLiteral("bin/dxc"));
+        if (QFileInfo::exists(sdkDxc))
+            return sdkDxc;
+    }
+
     return QString();
 }
 
@@ -267,7 +285,14 @@ ShaderCompileResult ShaderCompiler::compileHLSL(const QString &source,
 
     const QString dxc = findDxcExecutable();
     if (dxc.isEmpty()) {
-        out.stderrText = QStringLiteral("Could not find `dxc`. Install the Vulkan SDK or set SHADERTOOL_DXC to the dxc binary path.");
+        out.stderrText = QStringLiteral(
+            "Could not find `dxc` (DirectX Shader Compiler).\n\n"
+            "To fix this, do ONE of the following:\n"
+            "  1. Install the Vulkan SDK: https://vulkan.lunarg.com/sdk/home\n"
+            "     (Ubuntu: sudo apt install vulkan-sdk)\n"
+            "  2. Install dxc standalone: sudo apt install dxc\n"
+            "  3. Set the environment variable SHADERTOOL_DXC=/path/to/dxc\n"
+            "  4. Place the dxc binary on your PATH");
         return out;
     }
 

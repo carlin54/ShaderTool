@@ -19,6 +19,7 @@ struct RasterPreviewBuild {
     QVector<RasterStageBinary> stages;
     QVector<QImage> textures;
     QString meshPath;
+    RasterPreviewPipeline::BlendMode blendMode = RasterPreviewPipeline::BlendOff;
 };
 
 class PreviewVulkanWindow : public QVulkanWindow
@@ -29,7 +30,8 @@ public:
 
     void setRasterStages(const QVector<RasterStageBinary> &stages);
     void setRasterPayload(const QVector<RasterStageBinary> &stages, const QVector<QImage> &textures,
-                          const QString &meshPath);
+                          const QString &meshPath,
+                          RasterPreviewPipeline::BlendMode blendMode = RasterPreviewPipeline::BlendOff);
 
     bool takeRasterStages(QVector<RasterStageBinary> *out);
     bool takeRasterPreviewBuild(RasterPreviewBuild *out);
@@ -50,6 +52,7 @@ private:
     QVector<RasterStageBinary> m_pendingStages;
     QVector<QImage> m_pendingTextures;
     QString m_pendingMeshPath;
+    RasterPreviewPipeline::BlendMode m_pendingBlendMode = RasterPreviewPipeline::BlendOff;
     bool m_hasPendingShader = false;
 
     QElapsedTimer m_simTime;
@@ -58,10 +61,18 @@ private:
     quint64 m_frameIndex = 0;
     HostUniforms m_host;
     QPointF m_lastMouseInside;
+    QPointF m_lastDragPos;
     bool m_mouseInside = false;
     uint32_t m_buttons = 0;
     float m_scrollX = 0.f;
     float m_scrollY = 0.f;
+    float m_dragAccumX = 0.f;
+    float m_dragAccumY = 0.f;
+    float m_scrollAccumX = 0.f;
+    float m_scrollAccumY = 0.f;
+    QPointF m_lastPanPos;
+    float m_panAccumX = 0.f;
+    float m_panAccumY = 0.f;
 };
 
 #endif

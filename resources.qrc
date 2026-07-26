@@ -5,8 +5,78 @@
         <file alias="warm.json">resources/examples/basics/warm.json</file>
         <file alias="mesh_obj.json">resources/examples/basics/mesh_obj.json</file>
     </qresource>
+    <qresource prefix="/examples/effects">
+        <file alias="fire.json">resources/examples/effects/fire.json</file>
+        <file alias="plasma.json">resources/examples/effects/plasma.json</file>
+        <file alias="water_ripples.json">resources/examples/effects/water_ripples.json</file>
+        <file alias="starfield.json">resources/examples/effects/starfield.json</file>
+        <file alias="aurora.json">resources/examples/effects/aurora.json</file>
+        <file alias="lava_lamp.json">resources/examples/effects/lava_lamp.json</file>
+    </qresource>
+    <qresource prefix="/examples/lighting">
+        <file alias="toon.json">resources/examples/lighting/toon.json</file>
+        <file alias="phong.json">resources/examples/lighting/phong.json</file>
+        <file alias="rim_light.json">resources/examples/lighting/rim_light.json</file>
+        <file alias="matcap.json">resources/examples/lighting/matcap.json</file>
+        <file alias="wireframe.json">resources/examples/lighting/wireframe.json</file>
+        <file alias="normals.json">resources/examples/lighting/normals.json</file>
+        <file alias="dynamic_point_light.json">resources/examples/lighting/dynamic_point_light.json</file>
+        <file alias="orbit_light.json">resources/examples/lighting/orbit_light.json</file>
+        <file alias="multi_light.json">resources/examples/lighting/multi_light.json</file>
+    </qresource>
+    <qresource prefix="/examples/textures">
+        <file alias="textured_quad.json">resources/examples/textures/textured_quad.json</file>
+        <file alias="distortion.json">resources/examples/textures/distortion.json</file>
+        <file alias="normal_map.json">resources/examples/textures/normal_map.json</file>
+        <file alias="multi_blend.json">resources/examples/textures/multi_blend.json</file>
+    </qresource>
+    <qresource prefix="/examples/postprocess">
+        <file alias="crt.json">resources/examples/postprocess/crt.json</file>
+        <file alias="pixelation.json">resources/examples/postprocess/pixelation.json</file>
+        <file alias="chromatic_aberration.json">resources/examples/postprocess/chromatic_aberration.json</file>
+        <file alias="vignette.json">resources/examples/postprocess/vignette.json</file>
+        <file alias="edge_detection.json">resources/examples/postprocess/edge_detection.json</file>
+        <file alias="glitch.json">resources/examples/postprocess/glitch.json</file>
+    </qresource>
+    <qresource prefix="/examples/patterns">
+        <file alias="mandelbrot.json">resources/examples/patterns/mandelbrot.json</file>
+        <file alias="voronoi.json">resources/examples/patterns/voronoi.json</file>
+        <file alias="truchet.json">resources/examples/patterns/truchet.json</file>
+        <file alias="sdf_raymarch.json">resources/examples/patterns/sdf_raymarch.json</file>
+        <file alias="kaleidoscope.json">resources/examples/patterns/kaleidoscope.json</file>
+        <file alias="moire.json">resources/examples/patterns/moire.json</file>
+    </qresource>
+    <qresource prefix="/examples/multipass">
+        <file alias="bloom.json">resources/examples/multipass/bloom.json</file>
+        <file alias="deferred.json">resources/examples/multipass/deferred.json</file>
+        <file alias="shadow_map.json">resources/examples/multipass/shadow_map.json</file>
+        <file alias="edge_glow.json">resources/examples/multipass/edge_glow.json</file>
+    </qresource>
+    <qresource prefix="/examples/blend">
+        <file alias="additive_glow.json">resources/examples/blend/additive_glow.json</file>
+        <file alias="transparent_layers.json">resources/examples/blend/transparent_layers.json</file>
+    </qresource>
+    <qresource prefix="/examples/compute">
+        <file alias="game_of_life.json">resources/examples/compute/game_of_life.json</file>
+        <file alias="fluid_sim.json">resources/examples/compute/fluid_sim.json</file>
+        <file alias="image_blur.json">resources/examples/compute/image_blur.json</file>
+    </qresource>
+    <qresource prefix="/examples/tessellation">
+        <file alias="displacement.json">resources/examples/tessellation/displacement.json</file>
+        <file alias="pn_triangles.json">resources/examples/tessellation/pn_triangles.json</file>
+        <file alias="adaptive_lod.json">resources/examples/tessellation/adaptive_lod.json</file>
+    </qresource>
     <qresource prefix="/examples/rt">
         <file alias="minimal.json">resources/examples/rt/minimal.json</file>
+        <file alias="reflections.json">resources/examples/rt/reflections.json</file>
+        <file alias="shadows.json">resources/examples/rt/shadows.json</file>
+        <file alias="procedural_geo.json">resources/examples/rt/procedural_geo.json</file>
+        <file alias="callable_materials.json">resources/examples/rt/callable_materials.json</file>
+        <file alias="anyhit_transparency.json">resources/examples/rt/anyhit_transparency.json</file>
+    </qresource>
+    <qresource prefix="/examples/subgroup">
+        <file alias="wave_reduction.json">resources/examples/subgroup/wave_reduction.json</file>
+        <file alias="wave_prefix_scan.json">resources/examples/subgroup/wave_prefix_scan.json</file>
     </qresource>
     <qresource prefix="/include">
         <file alias="host_catalog.hlsl">resources/include/host_catalog.hlsl</file>

@@ -28,11 +28,14 @@ public:
     ~RasterPreviewPipeline();
 
     void destroy(QVulkanDeviceFunctions *df, VkDevice dev);
+    enum BlendMode { BlendOff = 0, BlendAlpha, BlendAdditive };
+
     VkResult create(QVulkanWindow *window,
                     QVulkanDeviceFunctions *df,
                     const QVector<RasterStageBinary> &stagesIn,
                     const QVector<QImage> &textureImages = {},
-                    bool useMeshVertexInput = false);
+                    bool useMeshVertexInput = false,
+                    BlendMode blendMode = BlendOff);
 
     VkPipeline pipeline() const { return m_pipeline; }
     VkPipelineLayout pipelineLayout() const { return m_pipelineLayout; }

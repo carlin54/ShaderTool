@@ -102,7 +102,8 @@ void RasterPreviewPipeline::destroy(QVulkanDeviceFunctions *df, VkDevice dev)
 VkResult RasterPreviewPipeline::create(QVulkanWindow *window, QVulkanDeviceFunctions *df,
                                        const QVector<RasterStageBinary> &stagesIn,
                                        const QVector<QImage> &textureImages,
-                                       bool useMeshVertexInput)
+                                       bool useMeshVertexInput,
+                                       BlendMode blendMode)
 {
     VkDevice dev = window->device();
     destroy(df, dev);
@@ -194,7 +195,8 @@ VkResult RasterPreviewPipeline::create(QVulkanWindow *window, QVulkanDeviceFunct
     layoutBindingUbo.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     layoutBindingUbo.descriptorCount = 1;
     layoutBindingUbo.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT
-        | VK_SHADER_STAGE_GEOMETRY_BIT;
+        | VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT
+        | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
 
     VkDescriptorSetLayoutCreateInfo descLayoutUniformInfo{};
     descLayoutUniformInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -354,9 +356,22 @@ VkResult RasterPreviewPipeline::create(QVulkanWindow *window, QVulkanDeviceFunct
         vertexInputInfo.pVertexAttributeDescriptions = attrs;
     }
 
+    bool hasTessellation = false;
+    for (const RasterStageBinary &s : stages) {
+        if (s.stage == VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT
+            || s.stage == VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT) {
+            hasTessellation = true;
+            break;
+        }
+    }
+
     VkPipelineInputAssemblyStateCreateInfo ia{};
     ia.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    ia.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    ia.topology = hasTessellation ? VK_PRIMITIVE_TOPOLOGY_PATCH_LIST : VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+
+    VkPipelineTessellationStateCreateInfo tessState{};
+    tessState.sType = VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO;
+    tessState.patchControlPoints = 3;
 
     VkPipelineViewportStateCreateInfo vp{};
     vp.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -382,6 +397,23 @@ VkResult RasterPreviewPipeline::create(QVulkanWindow *window, QVulkanDeviceFunct
 
     VkPipelineColorBlendAttachmentState att{};
     att.colorWriteMask = 0xF;
+    if (blendMode == BlendAlpha) {
+        att.blendEnable = VK_TRUE;
+        att.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+        att.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        att.colorBlendOp = VK_BLEND_OP_ADD;
+        att.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+        att.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+        att.alphaBlendOp = VK_BLEND_OP_ADD;
+    } else if (blendMode == BlendAdditive) {
+        att.blendEnable = VK_TRUE;
+        att.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+        att.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;
+        att.colorBlendOp = VK_BLEND_OP_ADD;
+        att.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+        att.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+        att.alphaBlendOp = VK_BLEND_OP_ADD;
+    }
 
     VkPipelineColorBlendStateCreateInfo cb{};
     cb.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -400,6 +432,7 @@ VkResult RasterPreviewPipeline::create(QVulkanWindow *window, QVulkanDeviceFunct
     pipelineInfo.pStages = shaderStages.constData();
     pipelineInfo.pVertexInputState = &vertexInputInfo;
     pipelineInfo.pInputAssemblyState = &ia;
+    pipelineInfo.pTessellationState = hasTessellation ? &tessState : nullptr;
     pipelineInfo.pViewportState = &vp;
     pipelineInfo.pRasterizationState = &rs;
     pipelineInfo.pMultisampleState = &ms;

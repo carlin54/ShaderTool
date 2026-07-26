@@ -7,6 +7,10 @@
 
 int main(int argc, char *argv[])
 {
+#ifdef Q_OS_LINUX
+    if (qEnvironmentVariableIsSet("XDG_CURRENT_DESKTOP"))
+        QApplication::setAttribute(Qt::AA_DontUseNativeDialogs);
+#endif
     QApplication app(argc, argv);
     QCoreApplication::setApplicationName(QStringLiteral("ShaderTool"));
     QCoreApplication::setOrganizationName(QStringLiteral("ShaderTool"));

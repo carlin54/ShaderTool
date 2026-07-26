@@ -1,0 +1,19 @@
+{
+    "formatVersion": 1,
+    "hostUniformCatalogVersion": 1,
+    "name": "Post-processing / Glitch",
+    "pipelineKind": "raster",
+    "language": "hlsl",
+    "stages": [
+        {
+            "stage": "vertex",
+            "entryPoint": "VSMain",
+            "source": "struct VSOut {\n    float4 pos : SV_POSITION;\n    [[vk::location(0)]] float2 uv : TEXCOORD0;\n};\n\nVSOut VSMain(uint vid : SV_VertexID)\n{\n    VSOut o;\n    o.uv = float2((vid << 1) & 2, vid & 2);\n    o.pos = float4(o.uv * 2.0f - 1.0f, 0.0f, 1.0f);\n    o.uv.y = 1.0f - o.uv.y;\n    return o;\n}"
+        },
+        {
+            "stage": "fragment",
+            "entryPoint": "PSMain",
+            "source": "cbuffer Host : register(b0)\n{\n    float time_sim_ms;\n    float time_wall_ms;\n    float delta_time_ms;\n    uint  frame_index;\n    float resolution_x;\n    float resolution_y;\n    float mouse_x;\n    float mouse_y;\n    uint  mouse_buttons;\n    float scroll_delta_x;\n    float scroll_delta_y;\n    float drag_accum_x;\n    float drag_accum_y;\n    float scroll_accum_x;\n    float scroll_accum_y;\n    float pan_accum_x;\n    float pan_accum_y;\n};\n\nstruct VSOut {\n    float4 pos : SV_POSITION;\n    [[vk::location(0)]] float2 uv : TEXCOORD0;\n};\n\nfloat hash(float n)\n{\n    return frac(sin(n) * 43758.5453f);\n}\n\nfloat hash2(float2 p)\n{\n    return frac(sin(dot(p, float2(127.1f, 311.7f))) * 43758.5453f);\n}\n\nfloat3 baseScene(float2 uv, float t)\n{\n    float3 col;\n    col.r = 0.4f + 0.3f * sin(uv.x * 5.0f + t);\n    col.g = 0.3f + 0.3f * sin(uv.y * 7.0f + t * 1.2f);\n    col.b = 0.5f + 0.3f * cos((uv.x + uv.y) * 4.0f + t * 0.8f);\n    float2 c = float2(0.5f + 0.2f * sin(t), 0.5f + 0.2f * cos(t * 0.7f));\n    float d = length(uv - c);\n    col += 0.3f * smoothstep(0.15f, 0.05f, d);\n    return col;\n}\n\nfloat4 PSMain(VSOut i) : SV_Target\n{\n    float t = time_sim_ms * 0.001f;\n    float2 uv = i.uv;\n    float timeBlock = floor(t * 4.0f);\n    float glitchIntensity = step(0.7f, hash(timeBlock * 1.3f));\n    float blockY = floor(uv.y * 20.0f);\n    float blockRand = hash(blockY + timeBlock * 7.13f);\n    float shift = 0.0f;\n    if (glitchIntensity > 0.0f && blockRand > 0.6f)\n    {\n        shift = (blockRand - 0.6f) * 0.5f * sign(hash(blockY * 3.7f + timeBlock) - 0.5f);\n    }\n    float2 uvR = float2(uv.x + shift + 0.01f * glitchIntensity, uv.y);\n    float2 uvG = float2(uv.x + shift, uv.y);\n    float2 uvB = float2(uv.x + shift - 0.01f * glitchIntensity, uv.y);\n    float3 col;\n    col.r = baseScene(uvR, t).r;\n    col.g = baseScene(uvG, t).g;\n    col.b = baseScene(uvB, t).b;\n    float flicker = 1.0f - 0.1f * glitchIntensity * hash(timeBlock * 5.0f);\n    col *= flicker;\n    float scanJitter = step(0.85f, hash(floor(uv.y * resolution_y) + timeBlock * 13.0f)) * glitchIntensity;\n    col = lerp(col, float3(1.0f, 1.0f, 1.0f), scanJitter * 0.3f);\n    return float4(col, 1.0f);\n}"
+        }
+    ]
+}

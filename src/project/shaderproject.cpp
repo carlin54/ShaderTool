@@ -39,6 +39,8 @@ QString ShaderStageHelpers::dxcProfile(const QString &kind)
         return QStringLiteral("hs_6_0");
     if (kind == QStringLiteral("tessellation_evaluation"))
         return QStringLiteral("ds_6_0");
+    if (kind == QStringLiteral("compute"))
+        return QStringLiteral("cs_6_0");
     if (isRayTracingKind(kind))
         return QStringLiteral("lib_6_3");
     return QStringLiteral("vs_6_0");
@@ -47,7 +49,8 @@ QString ShaderStageHelpers::dxcProfile(const QString &kind)
 bool ShaderStageHelpers::isSupportedInRasterPreview(const QString &kind)
 {
     return kind == QStringLiteral("vertex") || kind == QStringLiteral("fragment")
-        || kind == QStringLiteral("geometry");
+        || kind == QStringLiteral("geometry") || kind == QStringLiteral("tessellation_control")
+        || kind == QStringLiteral("tessellation_evaluation");
 }
 
 QJsonObject ShaderProject::toJson() const
@@ -71,6 +74,8 @@ QJsonObject ShaderProject::toJson() const
     root[QStringLiteral("language")] = QStringLiteral("hlsl");
     if (!textures.isEmpty())
         root[QStringLiteral("textures")] = textures;
+    if (blend != QStringLiteral("off"))
+        root[QStringLiteral("blend")] = blend;
     if (pipelineKind == QStringLiteral("raytrace") && maxPipelineRayRecursionDepth > 0)
         root[QStringLiteral("maxPipelineRayRecursionDepth")] = qint64(maxPipelineRayRecursionDepth);
     return root;
@@ -90,6 +95,7 @@ ShaderProject ShaderProject::fromJson(const QJsonObject &o, QString *errorOut)
     p.pipelineKind = o.value(QStringLiteral("pipelineKind")).toString(QStringLiteral("raster"));
     p.meshPath = o.value(QStringLiteral("meshPath")).toString();
     p.textures = o.value(QStringLiteral("textures")).toArray();
+    p.blend = o.value(QStringLiteral("blend")).toString(QStringLiteral("off"));
     p.maxPipelineRayRecursionDepth = quint32(
         std::max(0, std::min(31, o.value(QStringLiteral("maxPipelineRayRecursionDepth")).toInt(0))));
 
@@ -110,8 +116,9 @@ QString ShaderProject::validationMessage(const ShaderProject &p)
 {
     if (p.formatVersion < 1)
         return QStringLiteral("formatVersion must be >= 1.");
-    if (p.pipelineKind != QStringLiteral("raster") && p.pipelineKind != QStringLiteral("raytrace"))
-        return QStringLiteral("pipelineKind must be \"raster\" or \"raytrace\".");
+    if (p.pipelineKind != QStringLiteral("raster") && p.pipelineKind != QStringLiteral("raytrace")
+        && p.pipelineKind != QStringLiteral("compute"))
+        return QStringLiteral("pipelineKind must be \"raster\", \"raytrace\", or \"compute\".");
     if (p.stages.isEmpty())
         return QStringLiteral("Project has no shader stages.");
 
@@ -143,6 +150,16 @@ QString ShaderProject::validationMessage(const ShaderProject &p)
         if (nClosest < 1)
             return QStringLiteral(
                 "GPU ray-tracing preview requires at least one \"closest_hit\" stage (found %1).").arg(nClosest);
+    }
+
+    if (p.pipelineKind == QStringLiteral("compute")) {
+        int nCompute = 0;
+        for (const ShaderStage &s : p.stages) {
+            if (s.kind == QStringLiteral("compute"))
+                ++nCompute;
+        }
+        if (nCompute != 1)
+            return QStringLiteral("Compute pipeline requires exactly one \"compute\" stage (found %1).").arg(nCompute);
     }
 
     return {};

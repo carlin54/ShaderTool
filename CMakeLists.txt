@@ -77,6 +77,10 @@ qt_add_executable(ShaderTool
     src/rt/rtpreviewwindow.cpp
     src/rt/rtpreviewwindow.h
     src/rt/raytracestages.h
+    src/compute/computepreviewengine.cpp
+    src/compute/computepreviewengine.h
+    src/compute/computepreviewwindow.cpp
+    src/compute/computepreviewwindow.h
     src/preview/hostuniforms.h
     src/project/shaderproject.cpp
     src/project/shaderproject.h
@@ -86,6 +90,8 @@ qt_add_executable(ShaderTool
     src/project/pathutils.h
     src/project/enums.cpp
     src/project/enums.h
+    src/project/shaderprojectbundle.cpp
+    src/project/shaderprojectbundle.h
     src/ui/hlslhighlighter.cpp
     src/ui/hlslhighlighter.h
 )
@@ -104,6 +110,7 @@ target_include_directories(ShaderTool PRIVATE
     ${SHADERTOOL_SRC}/compiler
     ${SHADERTOOL_SRC}/preview
     ${SHADERTOOL_SRC}/rt
+    ${SHADERTOOL_SRC}/compute
 )
 
 set_target_properties(ShaderTool PROPERTIES

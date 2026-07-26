@@ -16,6 +16,12 @@ struct HostUniforms {
     std::uint32_t mouse_buttons = 0;
     float scroll_delta_x = 0.f;
     float scroll_delta_y = 0.f;
+    float drag_accum_x = 0.f;
+    float drag_accum_y = 0.f;
+    float scroll_accum_x = 0.f;
+    float scroll_accum_y = 0.f;
+    float pan_accum_x = 0.f;
+    float pan_accum_y = 0.f;
 };
 
 static constexpr std::size_t kHostUniformsSize = sizeof(HostUniforms);

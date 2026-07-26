@@ -1,0 +1,43 @@
+{
+    "formatVersion": 1,
+    "hostUniformCatalogVersion": 1,
+    "name": "Multipass / Edge Glow",
+    "pipelineKind": "raster",
+    "language": "hlsl",
+    "passes": [
+        {
+            "name": "scene",
+            "output": "offscreen",
+            "resolution": [1.0, 1.0],
+            "stages": [
+                {
+                    "stage": "vertex",
+                    "entryPoint": "VSMain",
+                    "source": "struct VSOut { float4 pos : SV_POSITION; float2 uv : TEXCOORD0; };\nVSOut VSMain(uint vid : SV_VertexID)\n{\n    VSOut o;\n    float2 uv = float2((vid << 1) & 2, vid & 2);\n    o.pos = float4(uv * 2.0 - 1.0, 0.0, 1.0);\n    o.uv = uv;\n    o.uv.y = 1.0 - o.uv.y;\n    return o;\n}\n"
+                },
+                {
+                    "stage": "fragment",
+                    "entryPoint": "PSScene",
+                    "source": "cbuffer Host : register(b0)\n{\n    float time_sim_ms;\n    float time_wall_ms;\n    float delta_time_ms;\n    uint  frame_index;\n    float resolution_x;\n    float resolution_y;\n    float mouse_x;\n    float mouse_y;\n    uint  mouse_buttons;\n    float scroll_delta_x;\n    float scroll_delta_y;\n    float drag_accum_x;\n    float drag_accum_y;\n    float scroll_accum_x;\n    float scroll_accum_y;\n};\nstruct VSOut { float4 pos : SV_POSITION; float2 uv : TEXCOORD0; };\n\nfloat4 PSScene(VSOut i) : SV_Target\n{\n    float2 uv = i.uv;\n    float t = time_sim_ms * 0.001;\n    float3 color = float3(0.1, 0.1, 0.15);\n    float2 c1 = float2(0.3 + 0.1 * sin(t), 0.5);\n    float2 c2 = float2(0.7 - 0.1 * cos(t * 0.8), 0.5);\n    if (length(uv - c1) < 0.15) color = float3(0.9, 0.3, 0.2);\n    if (length(uv - c2) < 0.12) color = float3(0.2, 0.6, 0.9);\n    return float4(color, 1.0);\n}\n"
+                }
+            ]
+        },
+        {
+            "name": "edge_composite",
+            "output": "swapchain",
+            "inputs": ["scene"],
+            "stages": [
+                {
+                    "stage": "vertex",
+                    "entryPoint": "VSMain",
+                    "source": "struct VSOut { float4 pos : SV_POSITION; float2 uv : TEXCOORD0; };\nVSOut VSMain(uint vid : SV_VertexID)\n{\n    VSOut o;\n    float2 uv = float2((vid << 1) & 2, vid & 2);\n    o.pos = float4(uv * 2.0 - 1.0, 0.0, 1.0);\n    o.uv = uv;\n    o.uv.y = 1.0 - o.uv.y;\n    return o;\n}\n"
+                },
+                {
+                    "stage": "fragment",
+                    "entryPoint": "PSEdge",
+                    "source": "cbuffer Host : register(b0)\n{\n    float time_sim_ms;\n    float time_wall_ms;\n    float delta_time_ms;\n    uint  frame_index;\n    float resolution_x;\n    float resolution_y;\n    float mouse_x;\n    float mouse_y;\n    uint  mouse_buttons;\n    float scroll_delta_x;\n    float scroll_delta_y;\n    float drag_accum_x;\n    float drag_accum_y;\n    float scroll_accum_x;\n    float scroll_accum_y;\n};\n\n[[vk::combinedImageSampler]] [[vk::binding(0, 2)]]\nTexture2D sceneTex : register(t0, space2);\n[[vk::combinedImageSampler]] [[vk::binding(0, 2)]]\nSamplerState sceneSamp : register(s0, space2);\n\nstruct VSOut { float4 pos : SV_POSITION; float2 uv : TEXCOORD0; };\n\nfloat luminance(float3 c) { return dot(c, float3(0.2126, 0.7152, 0.0722)); }\n\nfloat4 PSEdge(VSOut i) : SV_Target\n{\n    float2 uv = i.uv;\n    float2 texel = 1.0 / float2(resolution_x, resolution_y);\n\n    float tl = luminance(sceneTex.Sample(sceneSamp, uv + float2(-texel.x, -texel.y)).rgb);\n    float t  = luminance(sceneTex.Sample(sceneSamp, uv + float2(0, -texel.y)).rgb);\n    float tr = luminance(sceneTex.Sample(sceneSamp, uv + float2(texel.x, -texel.y)).rgb);\n    float l  = luminance(sceneTex.Sample(sceneSamp, uv + float2(-texel.x, 0)).rgb);\n    float r  = luminance(sceneTex.Sample(sceneSamp, uv + float2(texel.x, 0)).rgb);\n    float bl = luminance(sceneTex.Sample(sceneSamp, uv + float2(-texel.x, texel.y)).rgb);\n    float b  = luminance(sceneTex.Sample(sceneSamp, uv + float2(0, texel.y)).rgb);\n    float br = luminance(sceneTex.Sample(sceneSamp, uv + float2(texel.x, texel.y)).rgb);\n\n    float gx = -tl - 2.0*l - bl + tr + 2.0*r + br;\n    float gy = -tl - 2.0*t - tr + bl + 2.0*b + br;\n    float edge = sqrt(gx*gx + gy*gy);\n\n    float3 scene = sceneTex.Sample(sceneSamp, uv).rgb;\n    float3 glowColor = float3(0.0, 1.0, 0.5) * edge * 3.0;\n    float3 color = scene + glowColor;\n    return float4(color, 1.0);\n}\n"
+                }
+            ]
+        }
+    ]
+}

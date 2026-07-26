@@ -108,3 +108,4 @@ __pycache__/
 # Misc
 tags
 compile_commands.json
+.claude/

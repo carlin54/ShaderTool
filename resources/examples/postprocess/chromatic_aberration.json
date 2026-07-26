@@ -1,0 +1,19 @@
+{
+    "formatVersion": 1,
+    "hostUniformCatalogVersion": 1,
+    "name": "Post-processing / Chromatic aberration",
+    "pipelineKind": "raster",
+    "language": "hlsl",
+    "stages": [
+        {
+            "stage": "vertex",
+            "entryPoint": "VSMain",
+            "source": "struct VSOut {\n    float4 pos : SV_POSITION;\n    [[vk::location(0)]] float2 uv : TEXCOORD0;\n};\n\nVSOut VSMain(uint vid : SV_VertexID)\n{\n    VSOut o;\n    o.uv = float2((vid << 1) & 2, vid & 2);\n    o.pos = float4(o.uv * 2.0f - 1.0f, 0.0f, 1.0f);\n    o.uv.y = 1.0f - o.uv.y;\n    return o;\n}"
+        },
+        {
+            "stage": "fragment",
+            "entryPoint": "PSMain",
+            "source": "cbuffer Host : register(b0)\n{\n    float time_sim_ms;\n    float time_wall_ms;\n    float delta_time_ms;\n    uint  frame_index;\n    float resolution_x;\n    float resolution_y;\n    float mouse_x;\n    float mouse_y;\n    uint  mouse_buttons;\n    float scroll_delta_x;\n    float scroll_delta_y;\n    float drag_accum_x;\n    float drag_accum_y;\n    float scroll_accum_x;\n    float scroll_accum_y;\n    float pan_accum_x;\n    float pan_accum_y;\n};\n\nstruct VSOut {\n    float4 pos : SV_POSITION;\n    [[vk::location(0)]] float2 uv : TEXCOORD0;\n};\n\nfloat pattern(float2 uv, float t)\n{\n    float v = 0.0f;\n    v += sin(uv.x * 10.0f + t) * 0.5f;\n    v += sin(uv.y * 8.0f + t * 1.3f) * 0.5f;\n    v += sin((uv.x + uv.y) * 6.0f + t * 0.7f) * 0.5f;\n    v += sin(length(uv - 0.5f) * 12.0f - t * 2.0f) * 0.5f;\n    return v * 0.25f + 0.5f;\n}\n\nfloat3 proceduralScene(float2 uv, float t)\n{\n    float p = pattern(uv, t);\n    float3 col;\n    col.r = p * (0.8f + 0.2f * sin(t));\n    col.g = p * (0.6f + 0.4f * sin(t * 1.3f + 2.0f));\n    col.b = p * (0.7f + 0.3f * cos(t * 0.8f));\n    return col;\n}\n\nfloat4 PSMain(VSOut i) : SV_Target\n{\n    float t = time_sim_ms * 0.001f;\n    float2 uv = i.uv;\n    float2 center = float2(0.5f, 0.5f);\n    float2 dir = uv - center;\n    float dist = length(dir);\n    float offset = dist * 0.03f;\n    float2 uvR = uv + dir * offset;\n    float2 uvG = uv;\n    float2 uvB = uv - dir * offset;\n    float r = proceduralScene(uvR, t).r;\n    float g = proceduralScene(uvG, t).g;\n    float b = proceduralScene(uvB, t).b;\n    return float4(r, g, b, 1.0f);\n}"
+        }
+    ]
+}

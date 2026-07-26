@@ -1,0 +1,29 @@
+{
+    "formatVersion": 1,
+    "hostUniformCatalogVersion": 1,
+    "name": "RT / Procedural geometry",
+    "pipelineKind": "raytrace",
+    "language": "hlsl",
+    "stages": [
+        {
+            "stage": "raygen",
+            "entryPoint": "RayGen",
+            "source": "[[vk::binding(0, 0)]] RWTexture2D<float4> gOutput;\n[[vk::binding(1, 0)]] cbuffer Host {\n    float time_sim_ms;\n    float time_wall_ms;\n    float delta_time_ms;\n    uint  frame_index;\n    float resolution_x;\n    float resolution_y;\n    float mouse_x;\n    float mouse_y;\n    uint  mouse_buttons;\n    float scroll_delta_x;\n    float scroll_delta_y;\n    float drag_accum_x;\n    float drag_accum_y;\n    float scroll_accum_x;\n    float scroll_accum_y;\n    float pan_accum_x;\n    float pan_accum_y;\n};\n[[vk::binding(2, 0)]] RaytracingAccelerationStructure gScene;\n\nstruct Payload { float4 c; };\n\n[shader(\"raygeneration\")]\nvoid RayGen()\n{\n    uint2 idx = DispatchRaysIndex().xy;\n    uint2 dim = DispatchRaysDimensions().xy;\n    float2 uv = (float2(idx) + 0.5) / float2(dim);\n    float2 ndc = uv * 2.0 - 1.0;\n    ndc.y = -ndc.y;\n    float aspect = float(dim.x) / float(dim.y);\n    float3 dir = normalize(float3(ndc.x * aspect, ndc.y, 2.0));\n\n    RayDesc ray;\n    ray.Origin = float3(0, 0.5, -3);\n    ray.TMin = 0.001;\n    ray.Direction = dir;\n    ray.TMax = 100.0;\n\n    Payload p;\n    p.c = float4(0, 0, 0, 1);\n    TraceRay(gScene, RAY_FLAG_NONE, 0xFF, 0, 0, 0, ray, p);\n    gOutput[idx] = p.c;\n}\n"
+        },
+        {
+            "stage": "miss",
+            "entryPoint": "Miss",
+            "source": "struct Payload { float4 c; };\n[shader(\"miss\")]\nvoid Miss(inout Payload p)\n{\n    float3 dir = WorldRayDirection();\n    float sky = saturate(0.5 + dir.y);\n    p.c = float4(lerp(float3(0.4, 0.6, 0.9), float3(0.05, 0.1, 0.3), sky), 1.0);\n}\n"
+        },
+        {
+            "stage": "intersection",
+            "entryPoint": "Intersection",
+            "source": "[shader(\"intersection\")]\nvoid Intersection()\n{\n    float3 origin = ObjectRayOrigin();\n    float3 dir = ObjectRayDirection();\n    float3 center = float3(0, 0, 0);\n    float radius = 0.5;\n    float3 oc = origin - center;\n    float a = dot(dir, dir);\n    float b = 2.0 * dot(oc, dir);\n    float c = dot(oc, oc) - radius * radius;\n    float disc = b * b - 4.0 * a * c;\n    if (disc >= 0.0) {\n        float t = (-b - sqrt(disc)) / (2.0 * a);\n        if (t >= RayTMin() && t <= RayTCurrent()) {\n            BuiltInTriangleIntersectionAttributes attr;\n            float3 hitLocal = origin + dir * t;\n            attr.barycentrics = float2(hitLocal.x + 0.5, hitLocal.y + 0.5);\n            ReportHit(t, 0, attr);\n        }\n    }\n}\n"
+        },
+        {
+            "stage": "closest_hit",
+            "entryPoint": "ClosestHit",
+            "source": "[[vk::binding(1, 0)]] cbuffer Host {\n    float time_sim_ms;\n    float time_wall_ms;\n    float delta_time_ms;\n    uint  frame_index;\n    float resolution_x;\n    float resolution_y;\n    float mouse_x;\n    float mouse_y;\n    uint  mouse_buttons;\n    float scroll_delta_x;\n    float scroll_delta_y;\n    float drag_accum_x;\n    float drag_accum_y;\n    float scroll_accum_x;\n    float scroll_accum_y;\n    float pan_accum_x;\n    float pan_accum_y;\n};\n\nstruct Payload { float4 c; };\n\n[shader(\"closesthit\")]\nvoid ClosestHit(inout Payload p, in BuiltInTriangleIntersectionAttributes a)\n{\n    float t = time_sim_ms * 0.001;\n    float3 hitPos = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();\n    float3 normal = normalize(hitPos);\n    float3 lightDir = normalize(float3(sin(t), 1.0, cos(t)));\n    float diff = max(dot(normal, lightDir), 0.0);\n    float3 col = float3(0.2, 0.6, 0.9) * (0.2 + 0.8 * diff);\n    float spec = pow(max(dot(reflect(-lightDir, normal), -WorldRayDirection()), 0.0), 32.0);\n    col += float3(1, 1, 1) * spec * 0.5;\n    p.c = float4(col, 1.0);\n}\n"
+        }
+    ]
+}

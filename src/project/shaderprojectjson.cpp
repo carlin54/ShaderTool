@@ -122,6 +122,15 @@ bool validateValue(const QJsonValue &instance, const QJsonObject &schema, const 
         return validateIntegerLike(instance, minv, path, err);
     }
 
+    if (type == QStringLiteral("number")) {
+        if (!instance.isDouble()) {
+            if (err)
+                *err = path + QStringLiteral(": expected number.");
+            return false;
+        }
+        return true;
+    }
+
     if (err)
         *err = path + QStringLiteral(": unsupported schema type.");
     return false;

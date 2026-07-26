@@ -1,0 +1,19 @@
+{
+    "formatVersion": 1,
+    "hostUniformCatalogVersion": 1,
+    "name": "Lighting / Normals visualizer",
+    "pipelineKind": "raster",
+    "language": "hlsl",
+    "stages": [
+        {
+            "stage": "vertex",
+            "entryPoint": "VSMain",
+            "source": "// Requires: mesh OBJ (File \u2192 Open Mesh OBJ)\n// Vertex layout: position (float3), normal (float3), UV (float2)\n\ncbuffer Host : register(b0)\n{\n    float time_sim_ms;\n    float time_wall_ms;\n    float delta_time_ms;\n    uint  frame_index;\n    float resolution_x;\n    float resolution_y;\n    float mouse_x;\n    float mouse_y;\n    uint  mouse_buttons;\n    float scroll_delta_x;\n    float scroll_delta_y;\n    float drag_accum_x;\n    float drag_accum_y;\n    float scroll_accum_x;\n    float scroll_accum_y;\n    float pan_accum_x;\n    float pan_accum_y;\n};\n\nstruct VSIn {\n    [[vk::location(0)]] float3 pos : POSITION;\n    [[vk::location(1)]] float3 nrm : NORMAL;\n    [[vk::location(2)]] float2 uv  : TEXCOORD0;\n};\n\nstruct VSOut {\n    float4 pos : SV_POSITION;\n    [[vk::location(0)]] float3 worldNrm : TEXCOORD0;\n    [[vk::location(1)]] float2 uv       : TEXCOORD1;\n    [[vk::location(2)]] float3 worldPos : TEXCOORD2;\n};\n\nfloat4x4 lookAtRH(float3 eye, float3 at, float3 up)\n{\n    float3 zaxis = normalize(eye - at);\n    float3 xaxis = normalize(cross(up, zaxis));\n    float3 yaxis = cross(zaxis, xaxis);\n    return float4x4(\n        float4(xaxis, -dot(xaxis, eye)),\n        float4(yaxis, -dot(yaxis, eye)),\n        float4(zaxis, -dot(zaxis, eye)),\n        float4(0, 0, 0, 1)\n    );\n}\n\nfloat4x4 perspectiveRH(float fovY, float aspect, float zn, float zf)\n{\n    float f = 1.0f / tan(fovY * 0.5f);\n    return float4x4(\n        float4(f / aspect, 0, 0, 0),\n        float4(0, f, 0, 0),\n        float4(0, 0, zf / (zn - zf), (zn * zf) / (zn - zf)),\n        float4(0, 0, -1, 0)\n    );\n}\n\nVSOut VSMain(VSIn i)\n{\n    VSOut o;\n\n    float yaw = drag_accum_x * 0.01f;\n    float pitch = clamp(-drag_accum_y * 0.01f, -1.4f, 1.4f);\n    float dist = max(0.5f, 3.0f - scroll_accum_y * 0.3f);\n\n    float3 fwd = float3(sin(yaw)*cos(pitch), sin(pitch), cos(yaw)*cos(pitch));\n    float3 right = normalize(cross(float3(0,1,0), fwd));\n    float3 up = cross(fwd, right);\n    float panScale = dist * 0.002f;\n    float3 at = right * (-pan_accum_x * panScale) + up * (pan_accum_y * panScale);\n    float3 eye = at + float3(\n        dist * cos(pitch) * sin(yaw),\n        dist * sin(pitch),\n        dist * cos(pitch) * cos(yaw)\n    );\n\n    float4x4 V = lookAtRH(eye, at, float3(0, 1, 0));\n    float aspect = max(0.001f, resolution_x / max(1.0f, resolution_y));\n    float4x4 P = perspectiveRH(radians(60.0f), aspect, 0.05f, 100.0f);\n\n    float4 wp = float4(i.pos, 1.0f);\n    o.pos = mul(P, mul(V, wp));\n    o.worldNrm = normalize(i.nrm);\n    o.uv = i.uv;\n    o.worldPos = i.pos;\n    return o;\n}\n"
+        },
+        {
+            "stage": "fragment",
+            "entryPoint": "PSMain",
+            "source": "cbuffer Host : register(b0)\n{\n    float time_sim_ms;\n    float time_wall_ms;\n    float delta_time_ms;\n    uint  frame_index;\n    float resolution_x;\n    float resolution_y;\n    float mouse_x;\n    float mouse_y;\n    uint  mouse_buttons;\n    float scroll_delta_x;\n    float scroll_delta_y;\n    float drag_accum_x;\n    float drag_accum_y;\n    float scroll_accum_x;\n    float scroll_accum_y;\n    float pan_accum_x;\n    float pan_accum_y;\n};\n\nstruct VSOut {\n    float4 pos : SV_POSITION;\n    [[vk::location(0)]] float3 worldNrm : TEXCOORD0;\n    [[vk::location(1)]] float2 uv       : TEXCOORD1;\n    [[vk::location(2)]] float3 worldPos : TEXCOORD2;\n};\n\nfloat4 PSMain(VSOut i) : SV_Target\n{\n    float3 n = normalize(i.worldNrm);\n    float3 col = n * 0.5 + 0.5;\n    return float4(col, 1.0);\n}\n"
+        }
+    ]
+}

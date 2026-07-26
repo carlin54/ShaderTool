@@ -27,6 +27,7 @@ struct ShaderProject {
     QString meshPath; // optional: OBJ path relative to project file or absolute
     QVector<ShaderStage> stages;
     QJsonArray textures; // [{ "path": "...", "slot": 0 }, ...]
+    QString blend = QStringLiteral("off"); // "off", "alpha", "additive"
 
     // Ray tracing only: optional cap for VkRayTracingPipelineCreateInfoKHR::maxPipelineRayRecursionDepth.
     // 0 = let the preview engine choose (device-dependent default).
